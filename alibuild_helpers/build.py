@@ -499,7 +499,7 @@ def doBuild(args, parser):
       todo += requires
     spec["full_requires"] = set(spec["full_requires"])
     spec["full_runtime_requires"] = set(spec["full_runtime_requires"])
-    # If something requires or runtime_requires a package, then it's not 
+    # If something requires or runtime_requires a package, then it's not
     # a build_requires only anymore, so we drop it from the list.
     spec["full_build_requires"] = set(spec["full_build_requires"]) - spec["full_runtime_requires"]
 
@@ -694,36 +694,58 @@ def doBuild(args, parser):
     # Recreate symlinks to this development package builds.
     if spec["package"] in develPkgs:
       debug("Creating symlinks to builds of devel package %s", spec["package"])
-      cmd = format("ln -snf %(pkgHash)s %(wd)s/BUILD/%(pkgName)s-latest",
-                   wd=workDir,
-                   pkgName=spec["package"],
-                   pkgHash=spec["hash"])
-      if develPrefix:
-        cmd += format(" && ln -snf %(pkgHash)s %(wd)s/BUILD/%(pkgName)s-latest-%(devPrefix)s",
-                      wd=workDir,
-                      pkgName=spec["package"],
-                      pkgHash=spec["hash"],
-                      devPrefix=develPrefix)
-      err = execute(cmd)
-      debug("Command %s returned %d", cmd, err)
-      # Last package built gets a "latest" mark.
-      cmd = format("ln -snf %(pkgVersion)s-%(pkgRevision)s %(wd)s/%(arch)s/%(pkgName)s/latest",
-                   wd=workDir,
-                   arch=args.architecture,
-                   pkgName=spec["package"],
-                   pkgVersion=spec["version"],
-                   pkgRevision=spec["revision"])
-      # Latest package built for a given devel prefix gets a "latest-%(family)s" mark.
-      if spec["build_family"]:
-        cmd += format(" && ln -snf %(pkgVersion)s-%(pkgRevision)s %(wd)s/%(arch)s/%(pkgName)s/latest-%(family)s",
-                      wd=workDir,
-                      arch=args.architecture,
-                      pkgName=spec["package"],
-                      pkgVersion=spec["version"],
-                      pkgRevision=spec["revision"],
-                      family=spec["build_family"])
-      err = execute(cmd)
-      debug("Command %s returned %d", cmd, err)
+      path_target = format("%(wd)s/BUILD/%(pkgHash)s",
+                          wd=workDir,
+                          pkgHash=spec["hash"])
+      print(path_target)
+      if exists(path_target):
+        print("Exists")
+      else:
+        print("Does not exist")
+      if True:
+        cmd = format("ln -snf %(pkgHash)s %(wd)s/BUILD/%(pkgName)s-latest",
+                     wd=workDir,
+                     pkgName=spec["package"],
+                     pkgHash=spec["hash"])
+        if develPrefix:
+          cmd += format(" && ln -snf %(pkgHash)s %(wd)s/BUILD/%(pkgName)s-latest-%(devPrefix)s",
+                        wd=workDir,
+                        pkgName=spec["package"],
+                        pkgHash=spec["hash"],
+                        devPrefix=develPrefix)
+        err = execute(cmd)
+        debug("Command %s returned %d", cmd, err)
+
+      path_target = format("%(wd)s/%(arch)s/%(pkgName)s/%(pkgVersion)s-%(pkgRevision)s",
+                     wd=workDir,
+                     arch=args.architecture,
+                     pkgName=spec["package"],
+                     pkgVersion=spec["version"],
+                     pkgRevision=spec["revision"])
+      print(path_target)
+      if exists(path_target):
+        print("Exists")
+      else:
+        print("Does not exist")
+      if True:
+        # Last package built gets a "latest" mark.
+        cmd = format("ln -snf %(pkgVersion)s-%(pkgRevision)s %(wd)s/%(arch)s/%(pkgName)s/latest",
+                     wd=workDir,
+                     arch=args.architecture,
+                     pkgName=spec["package"],
+                     pkgVersion=spec["version"],
+                     pkgRevision=spec["revision"])
+        # Latest package built for a given devel prefix gets a "latest-%(family)s" mark.
+        if spec["build_family"]:
+          cmd += format(" && ln -snf %(pkgVersion)s-%(pkgRevision)s %(wd)s/%(arch)s/%(pkgName)s/latest-%(family)s",
+                        wd=workDir,
+                        arch=args.architecture,
+                        pkgName=spec["package"],
+                        pkgVersion=spec["version"],
+                        pkgRevision=spec["revision"],
+                        family=spec["build_family"])
+        err = execute(cmd)
+        debug("Command %s returned %d", cmd, err)
 
     # Check if this development package needs to be rebuilt.
     if spec["package"] in develPkgs:
@@ -848,7 +870,7 @@ def doBuild(args, parser):
       }
       dependenciesDict[dep] = depInfo
     dependenciesJSON = str(dependenciesDict)
-      
+
     # Generate the part which creates the environment for the package.
     # This can be either variable set via the "env" keyword in the metadata
     # or paths which get appended via the "append_path" one.
